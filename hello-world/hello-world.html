@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<template>
+    <style>
+        .greeting { font-family: cursive }
+    </style>
+    <div class="greeting">
+        Hello <slot name="salutation">world</slot>
+    </div>
+</template>
+<script>
+
+const id = 'hello-world';
+const componentDoc = document.currentScript && document.currentScript.ownerDocument;
+
+
+class HelloWorld extends HTMLElement {
+    constructor() {
+        if (!componentDoc) return;
+        console.log('%s is constructed', id);
+        super();
+
+        const template = componentDoc.querySelector('template').content;
+        const shadowRoot = this.attachShadow({ mode: 'closed' });
+        shadowRoot.appendChild(template.cloneNode(true));
+    }
+
+    connectedCallback() {
+        console.log('%s is connected', id);
+    }
+
+    disconnectedCallback() {
+        console.log('%s is disconnected', id);
+    }
+
+    adoptedCallback(oldDocument, newDocument) {
+        console.log('%s is adopted', id, oldDocument, newDocument);
+    }
+}
+
+// Define the new element
+customElements.define(id, HelloWorld);
+
+</script>
+</html>

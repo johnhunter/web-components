@@ -3,13 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Hello world example</title>
-    <script type="module">
-    import './hello-world.js';
-    </script>
+    <!--
+        <script type="module">
+        import './hello-world.js';
+        </script>
+    -->
+    <link rel="import" href="hello-world.html">
 </head>
 <body>
 
-    <hello-world name="John"></hello-world>
+    <!-- <hello-world name="John"></hello-world> -->
+    <hello-world>
+        <span slot="salutation">John</span>
+    </hello-world>
 
 </body>
 </html>
