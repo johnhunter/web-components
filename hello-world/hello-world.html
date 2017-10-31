@@ -2,44 +2,64 @@
 <html>
 <template>
     <style>
-        .greeting { font-family: cursive }
+        .greeting {
+            font-family: cursive
+        }
     </style>
     <div class="greeting">
-        Hello <slot name="salutation">world</slot>
+        Hello
+        <slot name="salutation">world</slot>
     </div>
 </template>
 <script>
+(() => {
 
-const id = 'hello-world';
-const componentDoc = document.currentScript && document.currentScript.ownerDocument;
+    const id = 'hello-world';
 
+    // currentScript fails in class constructor so is defined outside
+    const componentDoc = document.currentScript && document.currentScript.ownerDocument;
 
-class HelloWorld extends HTMLElement {
-    constructor() {
-        if (!componentDoc) return;
-        console.log('%s is constructed', id);
-        super();
+    // Since class properties are public, use WeekMap to hold private refs to shadowRoots
+    const shadows = new WeakMap();
 
-        const template = componentDoc.querySelector('template').content;
-        const shadowRoot = this.attachShadow({ mode: 'closed' });
-        shadowRoot.appendChild(template.cloneNode(true));
+    class HelloWorld extends HTMLElement {
+        static get observedAttributes() { return ['color'] };
+        constructor() {
+            super();
+
+            if (!componentDoc) return;
+            console.log('%s is constructed', id);
+
+            const template = componentDoc.querySelector('template').content;
+            const shadowRoot = this.attachShadow({ mode: 'closed' });
+            shadowRoot.appendChild(template.cloneNode(true));
+
+            shadows.set(this, shadowRoot);
+        }
+
+        connectedCallback() {
+            console.log('%s is connected', id);
+        }
+
+        disconnectedCallback() {
+            console.log('%s is disconnected', id);
+        }
+
+        adoptedCallback(oldDocument, newDocument) {
+            console.log('%s is adopted', id, oldDocument, newDocument);
+        }
+
+        attributeChangedCallback(attr, oldValue, newValue) {
+            console.log('%s attribute %s changed to %s', id, attr, newValue);
+            const shadowRoot = shadows.get(this);
+            if (attr == 'color') {
+                shadowRoot.querySelectorAll('.greeting').forEach(el => el.style.color = newValue);
+            }
+        }
     }
 
-    connectedCallback() {
-        console.log('%s is connected', id);
-    }
-
-    disconnectedCallback() {
-        console.log('%s is disconnected', id);
-    }
-
-    adoptedCallback(oldDocument, newDocument) {
-        console.log('%s is adopted', id, oldDocument, newDocument);
-    }
-}
-
-// Define the new element
-customElements.define(id, HelloWorld);
+    customElements.define(id, HelloWorld);
+})();
 
 </script>
 </html>
